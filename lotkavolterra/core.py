@@ -78,13 +78,13 @@ class Simulation(genetic.core.Environment):
         pred = self.predator
 
         ratio_lowest = math.inf
-        ratio_highest = - math.inf
+        ratio_highest = -math.inf
 
-        for _ in range(steps):
+        for step in range(steps):
 
             prey = prey + ((solution.prey_growth/1023 * prey) -
                            (solution.encounter_rate/1023 * prey * pred))
-            pred = pred + ((solution.predator_growth/100000 *
+            pred = pred + ((solution.predator_growth/65535 *
                             prey * pred) - (solution.predator_mortality/1023 * pred))
 
             if math.isinf(pred) or math.isinf(prey) or math.floor(pred) <= 0 or math.floor(prey) <= 0:

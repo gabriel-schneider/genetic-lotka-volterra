@@ -1,4 +1,5 @@
 from abc import ABC
+import random
 
 
 class Environment(ABC):
@@ -69,6 +70,11 @@ class Population(ABC):
         fitness_rule.apply(solutions)
         for solution in solutions[maximum:]:
             del self.solutions[solution.identifier]
+
+    def cataclysm(self, amount):
+        for _ in range(amount):
+            del self.solutions[random.choice(list(self.solutions.keys()))]
+        self.populate()
 
     def evaluate(self, environment):
         for solution in self.solutions.values():

@@ -7,6 +7,8 @@ import random
 
 
 def main():
+    random.seed()
+
     population = Population(1000)
 
     environment = Simulation(prey=750, predator=500)
@@ -14,8 +16,16 @@ def main():
     population.populate()
 
     best_solution = None
+    no_improvement_count = 0
     try:
         while True:
+            sum_of_fitness = sum(
+                x.fitness for x in population.solutions.values())
+            if no_improvement_count > 1000:
+                print('Cataclysm!')
+                population.cataclysm(100)
+                no_improvement_count = 0
+
             solutions_to_crossover = population.select(
                 4, TournamentSelection(100))
             for solution_set in solutions_to_crossover:
@@ -36,6 +46,11 @@ def main():
             if population.generation % 100 == 0:
                 print(f'Generation {population.generation}...', end='')
                 print(f'({best_solution.fitness})')
+
+            if sum_of_fitness <= sum(x.fitness for x in population.solutions.values()):
+                no_improvement_count += 1
+            else:
+                no_improvement_count = 0
             population.generation += 1
     except KeyboardInterrupt:
         print(best_solution)
