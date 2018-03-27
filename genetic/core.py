@@ -54,26 +54,38 @@ class PopulationError(Exception):
 
 
 class Population(ABC):
-    def __init__(self, maximum):
+    def __init__(self, maximum, fitness_rule):
         self.maximum = maximum
         self.solutions = {}
         self.generation = 1
+        self._fitness_rule = fitness_rule
+        self.best = None
 
     def populate(self, count=-1):
         """Insert random solutions in the population"""
         pass
 
-    def cap(self, fitness_rule, maximum=-1):
+    def cap(self, maximum=-1, fitness_rule=None):
         """Limit the population size using a fitness rule"""
         maximum = self.maximum if maximum == -1 else maximum
+        if fitness_rule is None:
+            fitness_rule = self._fitness_rule
+
         solutions = list(self.solutions.values())
         fitness_rule.apply(solutions)
         for solution in solutions[maximum:]:
-            del self.solutions[solution.identifier]
+            self.remove(solution.identifier)
+
+    def remove(self, identifier):
+        if self.best == self.solutions[identifier]:
+            self.best = None
+        del self.solutions[identifier]
 
     def cataclysm(self, amount):
+        del self.solutions[self.best.identifier]
         for _ in range(amount):
-            del self.solutions[random.choice(list(self.solutions.keys()))]
+            self.remove(random.choice(list(self.solutions.keys())))
+        self.solutions[self.best.identifier] = self.best
         self.populate()
 
     def evaluate(self, environment):
@@ -85,6 +97,8 @@ class Population(ABC):
             self.solutions[solution.identifier] = solution
         except KeyError:
             raise PopulationError('Solution with identifier already exists!')
+        if self.best is None or self.best != self._fitness_rule.compare(self.best, solution):
+            self.best = solution
 
     def get(self, identifier):
         return self.solutions[identifier]

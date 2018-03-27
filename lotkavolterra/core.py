@@ -80,7 +80,7 @@ class Simulation(genetic.core.Environment):
         ratio_lowest = math.inf
         ratio_highest = -math.inf
 
-        for step in range(steps):
+        for _ in range(steps):
 
             prey = prey + ((solution.prey_growth/1023 * prey) -
                            (solution.encounter_rate/1023 * prey * pred))

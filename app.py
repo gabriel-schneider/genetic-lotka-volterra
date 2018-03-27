@@ -9,7 +9,7 @@ import random
 def main():
     random.seed()
 
-    population = Population(1000)
+    population = Population(1000, SmallerIsBetterRule())
 
     environment = Simulation(prey=750, predator=500)
 
@@ -42,7 +42,7 @@ def main():
                         continue
                     if best_solution == None or solution.fitness < best_solution.fitness:
                         best_solution = solution
-            population.cap(SmallerIsBetterRule())
+            population.cap()
             if population.generation % 100 == 0:
                 print(f'Generation {population.generation}...', end='')
                 print(f'({best_solution.fitness})')
