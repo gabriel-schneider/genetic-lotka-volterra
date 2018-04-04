@@ -48,14 +48,4 @@ def main():
 
 
 if __name__ == '__main__':
-
-    # def approx(value, lowest, best, highest):
-    #     if value >= best:
-    #         return 1 - (value - best) / (highest - best)
-    #     else:
-    #         return (value - lowest) / (best - lowest)
-
-    # for x in range(0, 110, 10):
-    #     print(f'{x}: {approx(x, 0, 50, 100)}')
-
     main()
