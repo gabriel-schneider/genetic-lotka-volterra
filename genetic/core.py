@@ -49,15 +49,10 @@ class Solution(ABC):
         self._fitness = value
 
 
-class PopulationError(Exception):
-    pass
-
-
 class Population(ABC):
     def __init__(self, maximum, fitness_rule):
         self.maximum = maximum
         self.solutions = {}
-        self.generation = 1
         self._fitness_rule = fitness_rule
         self.best = None
 
@@ -86,7 +81,6 @@ class Population(ABC):
         for _ in range(amount):
             self.remove(random.choice(list(self.solutions.keys())))
         self.solutions[self.best.identifier] = self.best
-        self.populate()
 
     def evaluate(self, environment):
         for solution in self.solutions.values():
@@ -95,13 +89,19 @@ class Population(ABC):
     def insert(self, solution):
         try:
             self.solutions[solution.identifier] = solution
+            if self.best is None or self.best is not self._fitness_rule.compare(self.best, solution):
+                self.best = solution
         except KeyError:
-            raise PopulationError('Solution with identifier already exists!')
-        if self.best is None or self.best != self._fitness_rule.compare(self.best, solution):
-            self.best = solution
+            return False
 
     def get(self, identifier):
-        return self.solutions[identifier]
+        if isinstance(identifier, (tuple, list)):
+            solutions = ()
+            for _id in identifier:
+                solutions = solutions + (self.solutions[_id],)
+            return solutions
+        else:
+            return self.solutions[identifier]
 
     def select(self, number_of_pairs, method):
         solutions = dict(self.solutions)

@@ -1,60 +1,61 @@
 from lotkavolterra.core import Simulation, Population, Solution
-from genetic.crossover import TwoPointCrossover
 from genetic.selection import TournamentSelection
+from genetic.fitness import SmallerIsBetterRule, HigherIsBetterRule
+from genetic.crossover import TwoPointCrossover
 from genetic.mutation import FlipBitMutator
-from genetic.fitness import SmallerIsBetterRule
 import random
 
 
 def main():
+
     random.seed()
 
     population = Population(1000, SmallerIsBetterRule())
 
-    environment = Simulation(prey=750, predator=500)
+    environment = Simulation(prey=80, predator=30)
 
     population.populate()
+    population.evaluate(environment)
 
-    best_solution = None
-    no_improvement_count = 0
+    crossover = TwoPointCrossover()
+    mutator = FlipBitMutator(0.05)
+    selector = TournamentSelection(100)
+
+    stats = []
+
     try:
-        while True:
-            sum_of_fitness = sum(
-                x.fitness for x in population.solutions.values())
-            if no_improvement_count > 1000:
-                print('Cataclysm!')
-                population.cataclysm(100)
-                no_improvement_count = 0
-
+        for generation in range(1000):
             solutions_to_crossover = population.select(
-                4, TournamentSelection(100))
+                4, selector)
             for solution_set in solutions_to_crossover:
-                solutions = (
-                    population.solutions[solution_set[0]], population.solutions[solution_set[1]])
-                new_solutions = Solution.crossover(
-                    solutions, TwoPointCrossover())
-                for solution in new_solutions:
-                    solution.mutate(FlipBitMutator(0.1))
-                    solution.fitness = environment.evaluate(solution, 1000)
-                    try:
-                        population.insert(solution)
-                    except:
-                        continue
-                    if best_solution == None or solution.fitness < best_solution.fitness:
-                        best_solution = solution
+                offsprings = Solution.crossover(
+                    population.get(solution_set), crossover)
+                for offspring in offsprings:
+                    offspring.mutate(mutator)
+                    offspring.fitness = environment.evaluate(offspring, 1000)
+                    population.insert(offspring)
             population.cap()
-            if population.generation % 100 == 0:
-                print(f'Generation {population.generation}...', end='')
-                print(f'({best_solution.fitness})')
-
-            if sum_of_fitness <= sum(x.fitness for x in population.solutions.values()):
-                no_improvement_count += 1
-            else:
-                no_improvement_count = 0
-            population.generation += 1
+            if generation % 10 == 0:
+                sum_of_fitness = sum(
+                    x.fitness for x in population.solutions.values())
+                stats.append(sum_of_fitness)
+                print(
+                    f'Generation {generation}... ({population.best.fitness}, {sum_of_fitness})')
     except KeyboardInterrupt:
-        print(best_solution)
+
+        print(population.best, sum(
+            x.fitness for x in population.solutions.values()))
 
 
 if __name__ == '__main__':
+
+    # def approx(value, lowest, best, highest):
+    #     if value >= best:
+    #         return 1 - (value - best) / (highest - best)
+    #     else:
+    #         return (value - lowest) / (best - lowest)
+
+    # for x in range(0, 110, 10):
+    #     print(f'{x}: {approx(x, 0, 50, 100)}')
+
     main()
