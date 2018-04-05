@@ -1,9 +1,13 @@
+import matplotlib.pyplot as pyplot
+import random
+import time
+
+
 from lotkavolterra.core import Simulation, Population, Solution
 from genetic.selection import TournamentSelection
 from genetic.fitness import SmallerIsBetterRule, HigherIsBetterRule
 from genetic.crossover import TwoPointCrossover
-from genetic.mutation import FlipBitMutator
-import random
+from genetic.mutation import FlipBitMutator, SwapBitMutator
 
 
 def main():
@@ -18,13 +22,17 @@ def main():
     population.evaluate(environment)
 
     crossover = TwoPointCrossover()
-    mutator = FlipBitMutator(0.05)
+    mutator = SwapBitMutator(0.05)
     selector = TournamentSelection(100)
 
     stats = []
 
+    generations = 1000
+    step = 100
+
+    start = time.time()
     try:
-        for generation in range(1000):
+        for generation in range(generations):
             solutions_to_crossover = population.select(
                 4, selector)
             for solution_set in solutions_to_crossover:
@@ -35,16 +43,21 @@ def main():
                     offspring.fitness = environment.evaluate(offspring, 1000)
                     population.insert(offspring)
             population.cap()
-            if generation % 10 == 0:
+            if generation % step == 0:
                 sum_of_fitness = sum(
                     x.fitness for x in population.solutions.values())
                 stats.append(sum_of_fitness)
                 print(
                     f'Generation {generation}... ({population.best.fitness}, {sum_of_fitness})')
     except KeyboardInterrupt:
-
         print(population.best, sum(
             x.fitness for x in population.solutions.values()))
+
+    print(f'Duration: {time.time() - start}')
+    pyplot.plot(stats)
+    pyplot.xlabel('Generations')
+    pyplot.ylabel('Population Fitness')
+    pyplot.show()
 
 
 if __name__ == '__main__':

@@ -98,7 +98,7 @@ class Simulation(genetic.core.Environment):
 
             if math.isinf(pred) or math.isinf(prey) or math.floor(pred) <= 0 or math.floor(prey) <= 0:
                 self.valid = False
-                return steps - step
+                return 10 - step/steps
 
             ratio = max(1, prey) / max(1, pred)
             ratio_lowest = ratio if ratio < ratio_lowest else ratio_lowest

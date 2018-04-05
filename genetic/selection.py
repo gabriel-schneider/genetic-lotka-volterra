@@ -30,8 +30,6 @@ class TournamentSelection(Selection):
             pair.append(solutions.pop().identifier)
         return pair
 
-# TODO: Implement
-
 
 class EliteSelection(Selection):
     def __init__(self, fitness_rule, allow_duplicates=False):
