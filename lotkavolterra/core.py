@@ -74,9 +74,10 @@ class Simulation(genetic.core.Environment):
         self.predator = predator
         self.valid = False
         self.stats = []
+        self.stats_cycle_steps = 0
 
     def evaluate(self, solution, steps=1000, stats=False):
-
+        """Evaluates a solution simulating it against the environment"""
         if stats:
             self.stats.clear()
 
